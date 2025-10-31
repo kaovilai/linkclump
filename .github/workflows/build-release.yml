@@ -33,13 +33,23 @@ jobs:
       - name: Create release zip
         run: |
           cd build
-          zip -r ../linkclump-extension-${{ github.ref_name }}.zip .
+          # Use a safe filename by replacing slashes with dashes
+          SAFE_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          zip -r ../linkclump-extension-${SAFE_NAME}.zip .
           cd ..
+      
+      - name: Set artifact name
+        id: artifact_name
+        run: |
+          # Use a safe name for artifacts by replacing slashes with dashes
+          SAFE_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          echo "name=linkclump-extension-${SAFE_NAME}" >> $GITHUB_OUTPUT
+          echo "zipfile=linkclump-extension-${SAFE_NAME}.zip" >> $GITHUB_OUTPUT
       
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linkclump-extension-${{ github.ref_name }}
+          name: ${{ steps.artifact_name.outputs.name }}
           path: build/
           retention-days: 90
       
@@ -47,5 +57,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: linkclump-extension-${{ github.ref_name }}.zip
+          files: ${{ steps.artifact_name.outputs.zipfile }}
           generate_release_notes: true
