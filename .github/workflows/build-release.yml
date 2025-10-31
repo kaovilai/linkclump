@@ -1,0 +1,61 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    paths:
+      - '.github/workflows/build-release.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build extension
+        run: npm run build
+      
+      - name: Create release zip
+        run: |
+          cd build
+          # Use a safe filename by replacing slashes with dashes
+          SAFE_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          zip -r ../linkclump-extension-${SAFE_NAME}.zip .
+          cd ..
+      
+      - name: Set artifact name
+        id: artifact_name
+        run: |
+          # Use a safe name for artifacts by replacing slashes with dashes
+          SAFE_NAME=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          echo "name=linkclump-extension-${SAFE_NAME}" >> $GITHUB_OUTPUT
+          echo "zipfile=linkclump-extension-${SAFE_NAME}.zip" >> $GITHUB_OUTPUT
+      
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact_name.outputs.name }}
+          path: build/
+          retention-days: 90
+      
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.artifact_name.outputs.zipfile }}
+          generate_release_notes: true
