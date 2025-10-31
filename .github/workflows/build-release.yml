@@ -7,6 +7,13 @@ on:
   pull_request:
     paths:
       - '.github/workflows/build-release.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/**'
+      - 'webpack.config.js'
+      - 'tsconfig.json'
+      - '.babelrc'
+      - 'eslint.config.js'
 
 jobs:
   build:
