@@ -4,12 +4,15 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    paths:
+      - '.github/workflows/build-release.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     
     steps:
       - name: Checkout code
@@ -27,9 +30,22 @@ jobs:
       - name: Build extension
         run: npm run build
       
+      - name: Create release zip
+        run: |
+          cd build
+          zip -r ../linkclump-extension-${{ github.ref_name }}.zip .
+          cd ..
+      
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: linkclump-extension-${{ github.ref_name }}
           path: build/
           retention-days: 90
+      
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: linkclump-extension-${{ github.ref_name }}.zip
+          generate_release_notes: true
