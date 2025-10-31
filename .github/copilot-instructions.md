@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Linkclump is a Chrome browser extension (Manifest V3) that allows users to open, copy, or bookmark multiple links at the same time by drawing a selection box over them. This is a fork of the original Linkclump extension, updated to work with Chrome's Manifest V3 requirements.
+Linkclump is a Chrome browser extension (Manifest V3) that allows users to open, copy, or bookmark multiple links at the same time by drawing a selection box over them. This is a fork of the original Linkclump extension by [benblack86](https://github.com/benblack86/linkclump), updated to work with Chrome's Manifest V3 requirements.
 
 ## Architecture
 
@@ -90,9 +90,16 @@ src-test/                # Test files
 
 ## Testing
 
-- Basic tests are located in `src-test/` directory
-- Tests are not integrated into npm scripts currently
-- When adding new features, ensure they work in Chrome browser by loading the extension from the `build/` directory
+- Basic tests are located in `src-test/` directory (uses TestCase framework)
+- Tests cover settings management and options functionality
+- Tests are not currently integrated into npm scripts
+- To test the extension manually:
+  1. Run `npm run build` to create the extension package
+  2. Open Chrome and navigate to `chrome://extensions/`
+  3. Enable "Developer mode"
+  4. Click "Load unpacked" and select the `build/` directory
+  5. Test the functionality on various websites
+- When adding new features, always test them in a real Chrome browser environment
 
 ## Build Output
 
